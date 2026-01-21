@@ -1,13 +1,19 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+import authRoutes from "./routes/authRoutes";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  }),
+);
 app.use(express.json());
+app.use(cookieParser());
 
-app.get("/health", (_, res) => {
-  res.json({ status: "ok" });
-});
+app.use("/auth", authRoutes);
 
 export default app;

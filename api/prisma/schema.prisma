@@ -53,7 +53,7 @@ model Organization {
   ownerId            Int
   isActive           Boolean              @default(true)
   createdAt          DateTime             @default(now())
-  updatedAt          DateTime
+  updatedAt          DateTime             @default(now())
   ActivityLog        ActivityLog[]
   Invite             Invite[]
   User               User                 @relation(fields: [ownerId], references: [id], onUpdate: NoAction)
@@ -84,7 +84,7 @@ model Project {
   isArchived     Boolean      @default(false)
   isActive       Boolean      @default(true)
   createdAt      DateTime     @default(now())
-  updatedAt      DateTime
+  updatedAt      DateTime     @default(now())
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   Task           Task[]
 
@@ -122,7 +122,7 @@ model Task {
   order          Int              @default(0)
   isActive       Boolean          @default(true)
   createdAt      DateTime         @default(now())
-  updatedAt      DateTime
+  updatedAt      DateTime         @default(now())
   User           User             @relation(fields: [createdBy], references: [id], onUpdate: NoAction)
   Project        Project          @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   TaskAssignee   TaskAssignee[]
@@ -173,7 +173,7 @@ model User {
   passwordHash       String
   isActive           Boolean              @default(true)
   createdAt          DateTime             @default(now())
-  updatedAt          DateTime
+  updatedAt          DateTime             @default(now())
   ActivityLog        ActivityLog[]
   Notification       Notification[]
   Organization       Organization[]
