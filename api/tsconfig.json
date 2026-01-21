@@ -44,5 +44,11 @@
 
     "allowSyntheticDefaultImports": true
   },
-  "exclude": ["eslint.config.ts", "prisma.config.ts", "node_modules", "dist"]
+  "exclude": [
+    "eslint.config.ts",
+    "prisma.config.ts",
+    "generated",
+    "node_modules",
+    "dist"
+  ]
 }

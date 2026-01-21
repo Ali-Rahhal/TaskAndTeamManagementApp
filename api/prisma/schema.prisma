@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -8,172 +8,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  name         String
-  passwordHash String
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  memberships     OrganizationMember[]
-  tasksCreated    Task[]               @relation("TaskCreator")
-  taskComments    TaskComment[]
-  taskAssigned    TaskAssignee[]
-  sessions        Session[]
-  notifications   Notification[]
-  taskAttachments TaskAttachment[]
-  activityLogs    ActivityLog[]
-  organizations   Organization[]
-}
-
-model Session {
-  id           Int      @id @default(autoincrement())
-  userId       Int
-  refreshToken String   @unique
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
-model Organization {
-  id        Int      @id @default(autoincrement())
-  name      String
-  slug      String   @unique
-  ownerId   Int
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  owner    User                 @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  members  OrganizationMember[]
-  projects Project[]
-  invites  Invite[]
-  activity ActivityLog[]
-}
-
-model OrganizationMember {
-  id             Int      @id @default(autoincrement())
-  userId         Int
-  organizationId Int
-  role           String // OWNER | ADMIN | MEMBER
-  isActive       Boolean  @default(true)
-  joinedAt       DateTime @default(now())
-
-  user         User         @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([userId, organizationId])
-  @@index([organizationId])
-  @@index([userId])
-}
-
-model Project {
-  id             Int      @id @default(autoincrement())
-  organizationId Int
-  name           String
-  description    String?
-  isArchived     Boolean  @default(false)
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  tasks        Task[]
-
-  @@index([organizationId])
-}
-
-model Task {
-  id          Int       @id @default(autoincrement())
-  projectId   Int
-  title       String
-  description String?
-  status      String    @default("TODO") // TODO | IN_PROGRESS | DONE | BLOCKED
-  priority    String    @default("MEDIUM") // LOW | MEDIUM | HIGH | URGENT
-  createdBy   Int
-  dueDate     DateTime?
-  order       Int       @default(0)
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  creator     User             @relation("TaskCreator", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  assignees   TaskAssignee[]
-  comments    TaskComment[]
-  attachments TaskAttachment[]
-
-  @@index([projectId, order])
-  @@index([projectId])
-  @@index([status])
-  @@index([priority])
-}
-
-model TaskAssignee {
-  id     Int @id @default(autoincrement())
-  taskId Int
-  userId Int
-
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@unique([taskId, userId])
-}
-
-model TaskComment {
-  id        Int      @id @default(autoincrement())
-  taskId    Int
-  userId    Int
-  content   String
-  createdAt DateTime @default(now())
-
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model TaskAttachment {
-  id         Int      @id @default(autoincrement())
-  taskId     Int
-  fileName   String
-  fileUrl    String
-  uploadedBy Int
-  createdAt  DateTime @default(now())
-
-  task     Task @relation(fields: [taskId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  uploader User @relation(fields: [uploadedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
 model ActivityLog {
-  id             Int      @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   organizationId Int
-  entityType     String // TASK | PROJECT | MEMBER
+  entityType     String
   entityId       Int
   action         String
   metadata       String?
   performedBy    Int
-  createdAt      DateTime @default(now())
+  createdAt      DateTime     @default(now())
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User           User         @relation(fields: [performedBy], references: [id], onUpdate: NoAction)
 
-  actor        User         @relation(fields: [performedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([organizationId])
   @@index([entityType, entityId])
+  @@index([organizationId])
 }
 
 model Invite {
-  id             Int       @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   organizationId Int
   email          String
-  role           String // OWNER | ADMIN | MEMBER
-  token          String    @unique
+  role           String
+  token          String       @unique
   expiresAt      DateTime
   acceptedAt     DateTime?
-  createdAt      DateTime  @default(now())
-
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  createdAt      DateTime     @default(now())
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model Notification {
@@ -183,6 +43,144 @@ model Notification {
   message   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
+}
 
-  user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+model Organization {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  slug               String               @unique
+  ownerId            Int
+  isActive           Boolean              @default(true)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime
+  ActivityLog        ActivityLog[]
+  Invite             Invite[]
+  User               User                 @relation(fields: [ownerId], references: [id], onUpdate: NoAction)
+  OrganizationMember OrganizationMember[]
+  Project            Project[]
+}
+
+model OrganizationMember {
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  organizationId Int
+  role           String
+  isActive       Boolean      @default(true)
+  joinedAt       DateTime     @default(now())
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User           User         @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model Project {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  name           String
+  description    String?
+  isArchived     Boolean      @default(false)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  Task           Task[]
+
+  @@index([organizationId])
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  refreshToken String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model sysdiagrams {
+  name         String @db.NVarChar(128)
+  principal_id Int
+  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B61F47817FD") @default(autoincrement())
+  version      Int?
+  definition   Bytes?
+
+  @@unique([principal_id, name], map: "UK_principal_name")
+}
+
+model Task {
+  id             Int              @id @default(autoincrement())
+  projectId      Int
+  title          String
+  description    String?
+  status         String           @default("TODO")
+  priority       String           @default("MEDIUM")
+  createdBy      Int
+  dueDate        DateTime?
+  order          Int              @default(0)
+  isActive       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
+  User           User             @relation(fields: [createdBy], references: [id], onUpdate: NoAction)
+  Project        Project          @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  TaskAssignee   TaskAssignee[]
+  TaskAttachment TaskAttachment[]
+  TaskComment    TaskComment[]
+
+  @@index([priority])
+  @@index([projectId])
+  @@index([projectId, order])
+  @@index([status])
+}
+
+model TaskAssignee {
+  id     Int  @id @default(autoincrement())
+  taskId Int
+  userId Int
+  Task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User   User @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@unique([taskId, userId])
+}
+
+model TaskAttachment {
+  id         Int      @id @default(autoincrement())
+  taskId     Int
+  fileName   String
+  fileUrl    String
+  uploadedBy Int
+  createdAt  DateTime @default(now())
+  Task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User       User     @relation(fields: [uploadedBy], references: [id], onUpdate: NoAction)
+}
+
+model TaskComment {
+  id        Int      @id @default(autoincrement())
+  taskId    Int
+  userId    Int
+  content   String
+  createdAt DateTime @default(now())
+  Task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User      User     @relation(fields: [userId], references: [id], onUpdate: NoAction)
+}
+
+model User {
+  id                 Int                  @id @default(autoincrement())
+  email              String               @unique
+  name               String
+  passwordHash       String
+  isActive           Boolean              @default(true)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime
+  ActivityLog        ActivityLog[]
+  Notification       Notification[]
+  Organization       Organization[]
+  OrganizationMember OrganizationMember[]
+  Session            Session[]
+  Task               Task[]
+  TaskAssignee       TaskAssignee[]
+  TaskAttachment     TaskAttachment[]
+  TaskComment        TaskComment[]
 }
