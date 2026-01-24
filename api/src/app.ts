@@ -2,6 +2,9 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes";
+import oraganizationRoutes from "./routes/organizationRoutes";
+import memberRoutes from "./routes/organizationMemberRoutes";
+import invitePublicRoutes from "./routes/invitePublicRoutes";
 
 const app = express();
 
@@ -19,5 +22,11 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/auth", authRoutes);
+
+app.use("/organizations", oraganizationRoutes);
+
+app.use("/organizations/:organizationId/members", memberRoutes);
+
+app.use("/api/invites", invitePublicRoutes);
 
 export default app;
