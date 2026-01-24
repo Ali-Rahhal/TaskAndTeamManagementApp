@@ -9,6 +9,10 @@ app.use(
   cors({
     origin: "http://localhost:3000",
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Content-Length"],
+    maxAge: 86400, // Cache preflight requests for 24 hours
   }),
 );
 app.use(express.json());

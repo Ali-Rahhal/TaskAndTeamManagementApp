@@ -11,7 +11,7 @@ datasource db {
 model ActivityLog {
   id             Int          @id @default(autoincrement())
   organizationId Int
-  entityType     String
+  entityType     String // TASK | PROJECT | MEMBER
   entityId       Int
   action         String
   metadata       String?
@@ -28,7 +28,7 @@ model Invite {
   id             Int          @id @default(autoincrement())
   organizationId Int
   email          String
-  role           String
+  role           String // OWNER | ADMIN | MEMBER
   token          String       @unique
   expiresAt      DateTime
   acceptedAt     DateTime?
@@ -65,7 +65,7 @@ model OrganizationMember {
   id             Int          @id @default(autoincrement())
   userId         Int
   organizationId Int
-  role           String
+  role           String // OWNER | ADMIN | MEMBER
   isActive       Boolean      @default(true)
   joinedAt       DateTime     @default(now())
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -115,8 +115,8 @@ model Task {
   projectId      Int
   title          String
   description    String?
-  status         String           @default("TODO")
-  priority       String           @default("MEDIUM")
+  status         String           @default("TODO") // TODO | IN_PROGRESS | DONE | BLOCKED
+  priority       String           @default("MEDIUM") // LOW | MEDIUM | HIGH | URGENT
   createdBy      Int
   dueDate        DateTime?
   order          Int              @default(0)
