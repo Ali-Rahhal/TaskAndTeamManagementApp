@@ -77,7 +77,7 @@ export const UserController = {
 
     const updated = await prisma.user.update({
       where: { id },
-      data: { sysRole },
+      data: { sysRole, updatedAt: new Date() },
       select: {
         id: true,
         email: true,

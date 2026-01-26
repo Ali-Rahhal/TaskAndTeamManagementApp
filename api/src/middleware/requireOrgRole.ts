@@ -7,7 +7,7 @@ export const requireOrgRole = (minRole: OrgRole) => {
     try {
       if (!req.user) return res.sendStatus(401);
       const userId = req.user.id; //The code retrieves the userId property from the request object, which is presumably set by a middleware function that authenticates the user and adds the userId to the request object.
-      const orgId = Number(req.params.orgId);
+      const orgId = Number(req.params.organizationId);
 
       if (!orgId) {
         return res.status(400).json({ error: "Organization ID required" });

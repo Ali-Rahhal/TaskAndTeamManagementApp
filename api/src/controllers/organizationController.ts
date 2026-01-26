@@ -52,7 +52,7 @@ export const OrganizationController = {
 
   // Get org details
   async getById(req: Request, res: Response) {
-    const orgId = Number(req.params.orgId);
+    const orgId = Number(req.params.organizationId);
 
     const org = await prisma.organization.findUnique({
       where: { id: orgId },
@@ -73,12 +73,12 @@ export const OrganizationController = {
 
   // Update org (ADMIN+)
   async update(req: Request, res: Response) {
-    const orgId = Number(req.params.orgId);
+    const orgId = Number(req.params.organizationId);
     const { name } = req.body;
 
     const updated = await prisma.organization.update({
       where: { id: orgId },
-      data: { name },
+      data: { name, updatedAt: new Date() },
     });
 
     res.json(updated);
@@ -86,7 +86,7 @@ export const OrganizationController = {
 
   // Delete org (OWNER only)
   async remove(req: Request, res: Response) {
-    const orgId = Number(req.params.orgId);
+    const orgId = Number(req.params.organizationId);
 
     await prisma.organization.update({
       where: { id: orgId },
@@ -100,7 +100,7 @@ export const OrganizationController = {
   async getMyRole(req: Request, res: Response) {
     if (!req.user) return res.sendStatus(401);
     const userId = req.user.id;
-    const orgId = Number(req.params.orgId);
+    const orgId = Number(req.params.organizationId);
 
     const membership = await prisma.organizationMember.findUnique({
       where: {
