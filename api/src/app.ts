@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import oraganizationRoutes from "./routes/organizationRoutes";
-import memberRoutes from "./routes/organizationMemberRoutes";
 import invitePublicRoutes from "./routes/invitePublicRoutes";
 
 const app = express();
@@ -27,8 +26,6 @@ app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 
 app.use("/organizations", oraganizationRoutes);
-
-app.use("/organizations/:organizationId/members", memberRoutes);
 
 app.use("/api/invites", invitePublicRoutes);
 

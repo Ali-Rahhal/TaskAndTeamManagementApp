@@ -2,6 +2,7 @@ import { Router } from "express";
 import { OrganizationController } from "../controllers/organizationController";
 import { requireAuth } from "../middleware/requireAuth";
 import { requireOrgRole } from "../middleware/requireOrgRole";
+import memberRoutes from "./organizationMemberRoutes";
 import inviteRoutes from "./inviteRoutes";
 import projectRoutes from "./projectRoutes";
 
@@ -44,6 +45,8 @@ router.get(
   requireOrgRole("MEMBER"),
   OrganizationController.getMyRole,
 );
+
+router.use("/:organizationId/members", memberRoutes);
 
 router.use("/:organizationId/invites", inviteRoutes);
 
