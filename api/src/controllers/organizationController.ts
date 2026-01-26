@@ -5,7 +5,8 @@ export const OrganizationController = {
   // Create org + make creator OWNER
   async create(req: Request, res: Response) {
     try {
-      const userId = (req as any).userId;
+      if (!req.user) return res.sendStatus(401);
+      const userId = req.user.id;
       const { name, slug } = req.body;
 
       const organization = await prisma.organization.create({
@@ -30,7 +31,8 @@ export const OrganizationController = {
 
   // List orgs user belongs to
   async listMyOrganizations(req: Request, res: Response) {
-    const userId = (req as any).userId;
+    if (!req.user) return res.sendStatus(401);
+    const userId = req.user.id;
 
     const orgs = await prisma.organization.findMany({
       where: {
@@ -96,7 +98,8 @@ export const OrganizationController = {
 
   // Get current user's role
   async getMyRole(req: Request, res: Response) {
-    const userId = (req as any).userId;
+    if (!req.user) return res.sendStatus(401);
+    const userId = req.user.id;
     const orgId = Number(req.params.orgId);
 
     const membership = await prisma.organizationMember.findUnique({

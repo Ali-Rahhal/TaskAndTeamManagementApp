@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes";
+import userRoutes from "./routes/userRoutes";
 import oraganizationRoutes from "./routes/organizationRoutes";
 import memberRoutes from "./routes/organizationMemberRoutes";
 import invitePublicRoutes from "./routes/invitePublicRoutes";
@@ -22,6 +23,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/auth", authRoutes);
+
+app.use("/users", userRoutes);
 
 app.use("/organizations", oraganizationRoutes);
 

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { OrganizationController } from "../controllers/organizationController";
-import { requireAuth } from "../middleware/auth";
-import { requireOrgRole } from "../middleware/organizationRole";
+import { requireAuth } from "../middleware/requireAuth";
+import { requireOrgRole } from "../middleware/requireOrgRole";
 import inviteRoutes from "./inviteRoutes";
 
 const router = Router();

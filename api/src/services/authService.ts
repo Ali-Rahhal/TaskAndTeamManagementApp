@@ -22,8 +22,13 @@ export const AuthService = {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) throw new Error("Invalid credentials");
 
-    const accessToken = signAccessToken({ userId: user.id });
-    const refreshToken = signRefreshToken({ userId: user.id });
+    const accessToken = signAccessToken({
+      userId: user.id,
+      sysRole: user.sysRole,
+    });
+    const refreshToken = signRefreshToken({
+      userId: user.id,
+    });
 
     await prisma.session.create({
       data: {
@@ -50,7 +55,10 @@ export const AuthService = {
     });
     if (!session) throw new Error("Invalid refresh token");
 
-    const accessToken = signAccessToken({ userId: session.userId });
+    const accessToken = signAccessToken({
+      userId: session.userId,
+      sysRole: session.user.sysRole,
+    });
     return { accessToken };
   },
 

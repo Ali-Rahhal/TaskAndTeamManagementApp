@@ -15,7 +15,10 @@ export const requireAuth = (
 
   try {
     const payload: any = verifyToken(token);
-    (req as any).userId = payload.userId; //The code assigns payload.userId to the newly created userId property on the request object. This makes the user ID available throughout the request lifecycle—any subsequent middleware or route handlers can access req.userId to know who made the request.
+    req.user = {
+      id: payload.userId,
+      sysRole: payload.sysRole,
+    }; //The code sets the user property on the request object to an object containing the user's ID and system role. This makes the user's information available to subsequent middleware or route handlers.
     next();
   } catch {
     res.status(401).json({ error: "Invalid token" });

@@ -69,7 +69,8 @@ export const InviteController = {
   // Accept invite
   async accept(req: Request, res: Response) {
     try {
-      const userId = (req as any).userId;
+      if (!req.user) return res.sendStatus(401);
+      const userId = req.user.id;
       const token = req.params.token as string | undefined;
 
       if (!token) {

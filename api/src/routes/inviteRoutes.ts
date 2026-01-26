@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { InviteController } from "../controllers/inviteController";
-import { requireAuth } from "../middleware/auth";
-import { requireOrgRole } from "../middleware/organizationRole";
+import { requireAuth } from "../middleware/requireAuth";
+import { requireOrgRole } from "../middleware/requireOrgRole";
 
 const router = Router({ mergeParams: true });
 
