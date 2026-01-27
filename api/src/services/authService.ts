@@ -52,12 +52,13 @@ export const AuthService = {
   async refresh(refreshToken: string) {
     const session = await prisma.session.findUnique({
       where: { refreshToken },
+      include: { User: true },
     });
     if (!session) throw new Error("Invalid refresh token");
 
     const accessToken = signAccessToken({
       userId: session.userId,
-      sysRole: session.user.sysRole,
+      sysRole: session.User.sysRole,
     });
     return { accessToken };
   },
