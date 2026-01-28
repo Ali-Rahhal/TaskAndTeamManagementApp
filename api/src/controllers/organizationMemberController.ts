@@ -12,7 +12,7 @@ export const OrganizationMemberController = {
         id: true,
         role: true,
         joinedAt: true,
-        user: {
+        User: {
           select: {
             id: true,
             name: true,

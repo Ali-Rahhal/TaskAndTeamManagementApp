@@ -32,7 +32,7 @@ export const requireOrgRole = (minRole: OrgRole) => {
         return res.status(403).json({ error: "Insufficient permissions" });
       }
 
-      req.orgRole = membership.role;
+      req.orgRole = membership.role as OrgRole;
       next();
     } catch {
       res.status(500).json({ error: "Authorization failed" });
