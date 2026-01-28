@@ -2,6 +2,7 @@ import { Router } from "express";
 import { TaskController } from "../controllers/taskController";
 import { requireAuth } from "../middleware/requireAuth";
 import { requireOrgRole } from "../middleware/requireOrgRole";
+import taskAssigneeRoutes from "./taskAssigneeRoutes";
 
 const router = Router({ mergeParams: true });
 
@@ -38,5 +39,7 @@ router.delete(
   requireOrgRole("ADMIN"),
   TaskController.delete,
 );
+
+router.use("/:taskId/assignees", taskAssigneeRoutes);
 
 export default router;
