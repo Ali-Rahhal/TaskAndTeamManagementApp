@@ -12,7 +12,7 @@ router.use(requireAuth);
  */
 
 // current user
-router.get("/me", requireAuth, UserController.me);
+router.get("/me", UserController.me);
 
 // list all users
 router.get("/", requireRole("ADMIN", "SUPER_ADMIN"), UserController.list);

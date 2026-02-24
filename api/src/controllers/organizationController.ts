@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { logActivity } from "../utils/activityLogger";
 
 export const OrganizationController = {
   // Create org + make creator OWNER
@@ -14,13 +15,17 @@ export const OrganizationController = {
           name,
           slug,
           ownerId: userId,
-          OrganizationMember: {
-            create: {
-              userId,
-              role: "OWNER",
-            },
-          },
+          OrganizationMember: { create: { userId, role: "OWNER" } },
         },
+      });
+
+      await logActivity({
+        organizationId: organization.id,
+        entityType: "ORGANIZATION",
+        entityId: organization.id,
+        action: "CREATE",
+        performedBy: userId,
+        metadata: JSON.stringify({ name, slug }),
       });
 
       res.status(201).json(organization);
@@ -36,6 +41,7 @@ export const OrganizationController = {
 
     const orgs = await prisma.organization.findMany({
       where: {
+        isActive: true,
         OrganizationMember: {
           some: { userId, isActive: true },
         },
@@ -75,10 +81,20 @@ export const OrganizationController = {
   async update(req: Request, res: Response) {
     const orgId = Number(req.params.organizationId);
     const { name } = req.body;
+    if (!req.user) return res.sendStatus(401);
 
     const updated = await prisma.organization.update({
       where: { id: orgId },
       data: { name, updatedAt: new Date() },
+    });
+
+    await logActivity({
+      organizationId: orgId,
+      entityType: "ORGANIZATION",
+      entityId: orgId,
+      action: "UPDATE",
+      performedBy: req.user.id,
+      metadata: JSON.stringify({ name }),
     });
 
     res.json(updated);
@@ -87,10 +103,25 @@ export const OrganizationController = {
   // Delete org (OWNER only)
   async remove(req: Request, res: Response) {
     const orgId = Number(req.params.organizationId);
+    if (!req.user) return res.sendStatus(401);
 
-    await prisma.organization.update({
+    const member = await prisma.organizationMember.findFirst({
+      where: { userId: req.user.id, organizationId: orgId },
+    });
+    if (!member) return res.status(404).json({ error: "Not a member" });
+
+    const deleted = await prisma.organization.update({
       where: { id: orgId },
       data: { isActive: false },
+    });
+
+    await logActivity({
+      organizationId: orgId,
+      entityType: "ORGANIZATION",
+      entityId: orgId,
+      action: "DELETE",
+      performedBy: req.user.id,
+      metadata: JSON.stringify({ name: deleted.name }),
     });
 
     res.json({ ok: true });

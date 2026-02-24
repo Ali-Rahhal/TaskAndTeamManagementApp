@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import crypto from "crypto";
 import { prisma } from "../lib/prisma";
+import { logActivity } from "../utils/activityLogger";
 
 export const InviteController = {
   // List invites for an organization
@@ -29,9 +30,9 @@ export const InviteController = {
   async create(req: Request, res: Response) {
     try {
       const organizationId = Number(req.params.organizationId);
+      const performedBy = req.user!.id;
       const { email, role } = req.body;
 
-      // Prevent duplicate active invite
       const existing = await prisma.invite.findFirst({
         where: {
           organizationId,
@@ -53,16 +54,23 @@ export const InviteController = {
           email,
           role: role || "MEMBER",
           token,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         },
       });
 
-      // 🔥 Here you would send email with invite link
-      // https://yourapp.com/invite/${token}
+      // Log creation
+      await logActivity({
+        organizationId,
+        entityType: "INVITE",
+        entityId: invite.id,
+        action: "CREATE",
+        metadata: JSON.stringify({ email: invite.email, role: invite.role }),
+        performedBy,
+      });
 
       res.status(201).json(invite);
-    } catch {
-      res.status(400).json({ error: "Failed to create invite" });
+    } catch (err: any) {
+      res.status(400).json({ error: `Failed to create invite: ${err}` });
     }
   },
 
@@ -73,19 +81,14 @@ export const InviteController = {
       const userId = req.user.id;
       const token = req.params.token as string | undefined;
 
-      if (!token) {
-        return res.status(400).json({ error: "Token is required" });
-      }
+      if (!token) return res.status(400).json({ error: "Token is required" });
 
-      const invite = await prisma.invite.findUnique({
-        where: { token },
-      });
+      const invite = await prisma.invite.findUnique({ where: { token } });
 
       if (!invite || invite.acceptedAt || invite.expiresAt < new Date()) {
         return res.status(400).json({ error: "Invalid or expired invite" });
       }
 
-      // Prevent duplicate membership
       const exists = await prisma.organizationMember.findUnique({
         where: {
           userId_organizationId: {
@@ -95,23 +98,28 @@ export const InviteController = {
         },
       });
 
-      if (exists) {
-        return res.status(400).json({ error: "Already a member" });
-      }
+      if (exists) return res.status(400).json({ error: "Already a member" });
 
-      await prisma.$transaction([
-        prisma.organizationMember.create({
-          data: {
-            organizationId: invite.organizationId,
-            userId,
-            role: invite.role,
-          },
-        }),
-        prisma.invite.update({
-          where: { id: invite.id },
-          data: { acceptedAt: new Date() },
-        }),
-      ]);
+      await prisma.organizationMember.create({
+        data: {
+          organizationId: invite.organizationId,
+          userId,
+          role: invite.role,
+        },
+      });
+      await prisma.invite.update({
+        where: { id: invite.id },
+        data: { acceptedAt: new Date() },
+      });
+      // Log acceptance
+      await logActivity({
+        organizationId: invite.organizationId,
+        entityType: "INVITE",
+        entityId: invite.id,
+        action: "UPDATE",
+        metadata: JSON.stringify({ acceptedBy: userId }),
+        performedBy: userId,
+      });
 
       res.json({ ok: true });
     } catch {
@@ -121,10 +129,21 @@ export const InviteController = {
 
   // Revoke invite
   async remove(req: Request, res: Response) {
+    const performedBy = req.user!.id;
     const inviteId = Number(req.params.inviteId);
 
-    await prisma.invite.delete({
-      where: { id: inviteId },
+    const invite = await prisma.invite.findUnique({ where: { id: inviteId } });
+    if (!invite) return res.status(404).json({ error: "Invite not found" });
+
+    await prisma.invite.delete({ where: { id: inviteId } });
+
+    logActivity({
+      organizationId: invite.organizationId,
+      entityType: "INVITE",
+      entityId: invite.id,
+      action: "DELETE",
+      metadata: JSON.stringify({ email: invite.email, role: invite.role }),
+      performedBy,
     });
 
     res.json({ ok: true });

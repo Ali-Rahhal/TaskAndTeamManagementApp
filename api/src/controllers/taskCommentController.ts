@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { logActivity } from "../utils/activityLogger";
 
 // Create comment
 export const createComment = async (req: Request, res: Response) => {
@@ -8,16 +9,24 @@ export const createComment = async (req: Request, res: Response) => {
     const taskId = Number(req.params.taskId);
     const { content } = req.body;
 
-    if (!content) {
-      return res.status(400).json({ error: "Content is required" });
-    }
+    if (!content) return res.status(400).json({ error: "Content is required" });
 
     const comment = await prisma.taskComment.create({
-      data: {
-        content,
-        taskId,
-        userId: userId,
-      },
+      data: { content, taskId, userId },
+    });
+
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      include: { Project: { select: { organizationId: true } } },
+    });
+
+    await logActivity({
+      organizationId: task!.Project.organizationId,
+      entityType: "TASKCOMMENT",
+      entityId: comment.id,
+      action: "CREATE",
+      performedBy: userId,
+      metadata: JSON.stringify({ commentId: comment.id, content }),
     });
 
     res.status(201).json(comment);
@@ -57,18 +66,27 @@ export const updateComment = async (req: Request, res: Response) => {
     const comment = await prisma.taskComment.findUnique({
       where: { id: commentId },
     });
-
-    if (!comment) {
-      return res.status(404).json({ error: "Comment not found" });
-    }
-
-    if (comment.userId !== userId) {
+    if (!comment) return res.status(404).json({ error: "Comment not found" });
+    if (comment.userId !== userId)
       return res.status(403).json({ error: "Not your comment" });
-    }
 
     const updated = await prisma.taskComment.update({
       where: { id: commentId },
       data: { content },
+    });
+
+    const task = await prisma.task.findUnique({
+      where: { id: comment.taskId },
+      include: { Project: { select: { organizationId: true } } },
+    });
+
+    await logActivity({
+      organizationId: task!.Project.organizationId,
+      entityType: "TASKCOMMENT",
+      entityId: comment.id,
+      action: "UPDATE",
+      performedBy: userId,
+      metadata: JSON.stringify({ commentId, content }),
     });
 
     res.json(updated);
@@ -86,12 +104,8 @@ export const deleteComment = async (req: Request, res: Response) => {
     const comment = await prisma.taskComment.findUnique({
       where: { id: commentId },
     });
+    if (!comment) return res.status(404).json({ error: "Comment not found" });
 
-    if (!comment) {
-      return res.status(404).json({ error: "Comment not found" });
-    }
-
-    // Author OR admin+
     if (
       comment.userId !== userId &&
       req.orgRole !== "ADMIN" &&
@@ -100,8 +114,20 @@ export const deleteComment = async (req: Request, res: Response) => {
       return res.status(403).json({ error: "Not allowed" });
     }
 
-    await prisma.taskComment.delete({
-      where: { id: commentId },
+    await prisma.taskComment.delete({ where: { id: commentId } });
+
+    const task = await prisma.task.findUnique({
+      where: { id: comment.taskId },
+      include: { Project: { select: { organizationId: true } } },
+    });
+
+    await logActivity({
+      organizationId: task!.Project.organizationId,
+      entityType: "TASKCOMMENT",
+      entityId: comment.id,
+      action: "DELETE",
+      performedBy: userId,
+      metadata: JSON.stringify({ commentId }),
     });
 
     res.json({ message: "Comment deleted" });

@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { logActivity } from "../utils/activityLogger";
 
 // Create attachment (metadata only — assumes file already uploaded)
 export const createAttachment = async (req: Request, res: Response) => {
@@ -8,17 +9,25 @@ export const createAttachment = async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const { fileName, fileUrl } = req.body;
 
-    if (!fileName || !fileUrl) {
+    if (!fileName || !fileUrl)
       return res.status(400).json({ error: "fileName and fileUrl required" });
-    }
 
     const attachment = await prisma.taskAttachment.create({
-      data: {
-        taskId,
-        fileName,
-        fileUrl,
-        uploadedBy: userId,
-      },
+      data: { taskId, fileName, fileUrl, uploadedBy: userId },
+    });
+
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      include: { Project: { select: { organizationId: true } } },
+    });
+
+    await logActivity({
+      organizationId: task!.Project.organizationId,
+      entityType: "TASKATTACHMENT",
+      entityId: attachment.id,
+      action: "CREATE",
+      performedBy: userId,
+      metadata: JSON.stringify({ attachmentId: attachment.id, fileName }),
     });
 
     res.status(201).json(attachment);
@@ -57,10 +66,8 @@ export const deleteAttachment = async (req: Request, res: Response) => {
     const attachment = await prisma.taskAttachment.findUnique({
       where: { id: attachmentId },
     });
-
-    if (!attachment) {
+    if (!attachment)
       return res.status(404).json({ error: "Attachment not found" });
-    }
 
     if (
       attachment.uploadedBy !== userId &&
@@ -70,8 +77,20 @@ export const deleteAttachment = async (req: Request, res: Response) => {
       return res.status(403).json({ error: "Not allowed" });
     }
 
-    await prisma.taskAttachment.delete({
-      where: { id: attachmentId },
+    await prisma.taskAttachment.delete({ where: { id: attachmentId } });
+
+    const task = await prisma.task.findUnique({
+      where: { id: attachment.taskId },
+      include: { Project: { select: { organizationId: true } } },
+    });
+
+    await logActivity({
+      organizationId: task!.Project.organizationId,
+      entityType: "TASKATTACHMENT",
+      entityId: attachment.id,
+      action: "DELETE",
+      performedBy: userId,
+      metadata: JSON.stringify({ attachmentId }),
     });
 
     res.json({ message: "Attachment deleted" });

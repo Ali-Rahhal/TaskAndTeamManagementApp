@@ -15,7 +15,7 @@ router.use(requireAuth);
  */
 
 // list projects
-router.get("/", requireAuth, requireOrgRole("MEMBER"), ProjectController.list);
+router.get("/", requireOrgRole("MEMBER"), ProjectController.list);
 
 // get project
 router.get("/:projectId", requireOrgRole("MEMBER"), ProjectController.get);
