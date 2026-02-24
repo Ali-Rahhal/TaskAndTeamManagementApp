@@ -5,6 +5,7 @@ import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import oraganizationRoutes from "./routes/organizationRoutes";
 import invitePublicRoutes from "./routes/invitePublicRoutes";
+import notifictionRoutes from "./routes/notificationRoutes";
 
 const app = express();
 
@@ -28,5 +29,7 @@ app.use("/users", userRoutes);
 app.use("/organizations", oraganizationRoutes);
 
 app.use("/api/invites", invitePublicRoutes);
+
+app.use("/notifications", notifictionRoutes);
 
 export default app;

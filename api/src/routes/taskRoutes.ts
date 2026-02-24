@@ -4,12 +4,15 @@ import { requireAuth } from "../middleware/requireAuth";
 import { requireOrgRole } from "../middleware/requireOrgRole";
 import taskAssigneeRoutes from "./taskAssigneeRoutes";
 import taskCommentRoutes from "./taskCommentRoutes";
+import taskAttachmentRoutes from "./taskAttachmentRoutes";
 
 const router = Router({ mergeParams: true });
 
 router.use("/:taskId/assignees", taskAssigneeRoutes);
 
 router.use("/:taskId/comments", taskCommentRoutes);
+
+router.use("/:taskId/attachments", taskAttachmentRoutes);
 
 router.use(requireAuth);
 
