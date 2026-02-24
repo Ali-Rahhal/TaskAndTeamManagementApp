@@ -4,9 +4,11 @@ import { requireAuth } from "../middleware/requireAuth";
 
 const router = Router();
 
+router.use(requireAuth);
+
 /**
  * /api/invites/:token/accept
  */
-router.post("/:token/accept", requireAuth, InviteController.accept);
+router.post("/:token/accept", InviteController.accept);
 
 export default router;

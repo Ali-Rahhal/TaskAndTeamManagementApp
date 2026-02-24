@@ -5,30 +5,21 @@ import { requireOrgRole } from "../middleware/requireOrgRole";
 
 const router = Router({ mergeParams: true });
 
+router.use(requireAuth);
+
 /**
  * /api/organizations/:organizationId/members
  */
 
 // List members (MEMBER+)
-router.get(
-  "/",
-  requireAuth,
-  requireOrgRole("MEMBER"),
-  OrganizationMemberController.list,
-);
+router.get("/", requireOrgRole("MEMBER"), OrganizationMemberController.list);
 
 // Add member directly (ADMIN+)
-router.post(
-  "/",
-  requireAuth,
-  requireOrgRole("ADMIN"),
-  OrganizationMemberController.add,
-);
+router.post("/", requireOrgRole("ADMIN"), OrganizationMemberController.add);
 
 // Update member role (OWNER only)
 router.patch(
   "/:memberId/role",
-  requireAuth,
   requireOrgRole("OWNER"),
   OrganizationMemberController.updateRole,
 );
@@ -36,7 +27,6 @@ router.patch(
 // Remove member (OWNER only)
 router.delete(
   "/:memberId",
-  requireAuth,
   requireOrgRole("OWNER"),
   OrganizationMemberController.remove,
 );

@@ -5,22 +5,20 @@ import { requireOrgRole } from "../middleware/requireOrgRole";
 
 const router = Router({ mergeParams: true });
 
+router.use(requireAuth);
+router.use(requireOrgRole("ADMIN"));
+
 /**
  * /api/organizations/:organizationId/invites
  */
 
 // List invites (ADMIN+)
-router.get("/", requireAuth, requireOrgRole("ADMIN"), InviteController.list);
+router.get("/", InviteController.list);
 
 // Create invite (ADMIN+)
-router.post("/", requireAuth, requireOrgRole("ADMIN"), InviteController.create);
+router.post("/", InviteController.create);
 
 // Revoke invite (ADMIN+)
-router.delete(
-  "/:inviteId",
-  requireAuth,
-  requireOrgRole("ADMIN"),
-  InviteController.remove,
-);
+router.delete("/:inviteId", InviteController.remove);
 
 export default router;

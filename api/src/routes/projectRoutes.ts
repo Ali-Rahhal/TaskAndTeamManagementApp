@@ -6,6 +6,10 @@ import taskRoutes from "./taskRoutes";
 
 const router = Router({ mergeParams: true });
 
+router.use("/:projectId/tasks", taskRoutes);
+
+router.use(requireAuth);
+
 /**
  * /organizations/:organizationId/projects
  */
@@ -14,37 +18,19 @@ const router = Router({ mergeParams: true });
 router.get("/", requireAuth, requireOrgRole("MEMBER"), ProjectController.list);
 
 // get project
-router.get(
-  "/:projectId",
-  requireAuth,
-  requireOrgRole("MEMBER"),
-  ProjectController.get,
-);
+router.get("/:projectId", requireOrgRole("MEMBER"), ProjectController.get);
 
 // create project
-router.post(
-  "/",
-  requireAuth,
-  requireOrgRole("ADMIN"),
-  ProjectController.create,
-);
+router.post("/", requireOrgRole("ADMIN"), ProjectController.create);
 
 // update project
-router.put(
-  "/:projectId",
-  requireAuth,
-  requireOrgRole("ADMIN"),
-  ProjectController.update,
-);
+router.put("/:projectId", requireOrgRole("ADMIN"), ProjectController.update);
 
 // archive project
 router.delete(
   "/:projectId",
-  requireAuth,
   requireOrgRole("ADMIN"),
   ProjectController.archive,
 );
-
-router.use("/:projectId/tasks", taskRoutes);
 
 export default router;

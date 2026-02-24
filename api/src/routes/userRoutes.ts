@@ -5,6 +5,8 @@ import { requireRole } from "../middleware/requireRole";
 
 const router = Router();
 
+router.use(requireAuth);
+
 /**
  * /users
  */
@@ -13,25 +15,14 @@ const router = Router();
 router.get("/me", requireAuth, UserController.me);
 
 // list all users
-router.get(
-  "/",
-  requireAuth,
-  requireRole("ADMIN", "SUPER_ADMIN"),
-  UserController.list,
-);
+router.get("/", requireRole("ADMIN", "SUPER_ADMIN"), UserController.list);
 
 // get user by id
-router.get(
-  "/:userId",
-  requireAuth,
-  requireRole("ADMIN", "SUPER_ADMIN"),
-  UserController.get,
-);
+router.get("/:userId", requireRole("ADMIN", "SUPER_ADMIN"), UserController.get);
 
 // update system role
 router.patch(
   "/:userId/role",
-  requireAuth,
   requireRole("SUPER_ADMIN"),
   UserController.updateRole,
 );
@@ -39,7 +30,6 @@ router.patch(
 // deactivate user
 router.delete(
   "/:userId",
-  requireAuth,
   requireRole("ADMIN", "SUPER_ADMIN"),
   UserController.deactivate,
 );

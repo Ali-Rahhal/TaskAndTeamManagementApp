@@ -5,30 +5,21 @@ import { requireOrgRole } from "../middleware/requireOrgRole";
 
 const router = Router({ mergeParams: true });
 
+router.use(requireAuth);
+
 /**
  * /organizations/:organizationId/projects/:projectId/tasks/:taskId/assignees
  */
 
 // list assignees
-router.get(
-  "/",
-  requireAuth,
-  requireOrgRole("MEMBER"),
-  TaskAssigneeController.list,
-);
+router.get("/", requireOrgRole("MEMBER"), TaskAssigneeController.list);
 
 // assign user
-router.post(
-  "/",
-  requireAuth,
-  requireOrgRole("ADMIN"),
-  TaskAssigneeController.assign,
-);
+router.post("/", requireOrgRole("ADMIN"), TaskAssigneeController.assign);
 
 // unassign user
 router.delete(
   "/:userId",
-  requireAuth,
   requireOrgRole("ADMIN"),
   TaskAssigneeController.unassign,
 );

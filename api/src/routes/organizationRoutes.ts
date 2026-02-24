@@ -8,16 +8,23 @@ import projectRoutes from "./projectRoutes";
 
 const router = Router();
 
+router.use("/:organizationId/members", memberRoutes);
+
+router.use("/:organizationId/invites", inviteRoutes);
+
+router.use("/:organizationId/projects", projectRoutes);
+
+router.use(requireAuth);
+
 // Create organization (any authenticated user)
-router.post("/", requireAuth, OrganizationController.create);
+router.post("/", OrganizationController.create);
 
 // Get my organizations
-router.get("/", requireAuth, OrganizationController.listMyOrganizations);
+router.get("/", OrganizationController.listMyOrganizations);
 
 // Get organization by id (member only)
 router.get(
   "/:organizationId",
-  requireAuth,
   requireOrgRole("MEMBER"),
   OrganizationController.getById,
 );
@@ -25,7 +32,6 @@ router.get(
 // Update organization (ADMIN+)
 router.put(
   "/:organizationId",
-  requireAuth,
   requireOrgRole("ADMIN"),
   OrganizationController.update,
 );
@@ -33,7 +39,6 @@ router.put(
 // Delete organization (OWNER only)
 router.delete(
   "/:organizationId",
-  requireAuth,
   requireOrgRole("OWNER"),
   OrganizationController.remove,
 );
@@ -41,15 +46,8 @@ router.delete(
 // Get my role in organization
 router.get(
   "/:organizationId/me",
-  requireAuth,
   requireOrgRole("MEMBER"),
   OrganizationController.getMyRole,
 );
-
-router.use("/:organizationId/members", memberRoutes);
-
-router.use("/:organizationId/invites", inviteRoutes);
-
-router.use("/:organizationId/projects", projectRoutes);
 
 export default router;
