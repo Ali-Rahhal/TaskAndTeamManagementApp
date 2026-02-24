@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { prisma } from "../lib/prisma";
-import { signAccessToken, signRefreshToken } from "../utils/jwt";
+import { signAccessToken, signRefreshToken, verifyToken } from "../utils/jwt";
 
 export const AuthService = {
   async register(email: string, name: string, password: string) {
@@ -22,18 +23,22 @@ export const AuthService = {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) throw new Error("Invalid credentials");
 
+    const sessionId = crypto.randomUUID(); // this is jti
+
     const accessToken = signAccessToken({
       userId: user.id,
       sysRole: user.sysRole,
     });
+
     const refreshToken = signRefreshToken({
       userId: user.id,
+      jti: sessionId,
     });
 
     await prisma.session.create({
       data: {
+        id: sessionId,
         userId: user.id,
-        refreshToken,
         expiresAt: new Date(Date.now() + 7 * 86400000),
       },
     });
@@ -50,22 +55,44 @@ export const AuthService = {
   },
 
   async refresh(refreshToken: string) {
+    let decoded: any;
+
+    try {
+      decoded = verifyToken(refreshToken);
+    } catch {
+      throw new Error("Invalid refresh token");
+    }
+
     const session = await prisma.session.findUnique({
-      where: { refreshToken },
+      where: { id: decoded.jti },
       include: { User: true },
     });
+
     if (!session) throw new Error("Invalid refresh token");
+
+    if (session.expiresAt < new Date()) {
+      throw new Error("Refresh token expired");
+    }
 
     const accessToken = signAccessToken({
       userId: session.userId,
       sysRole: session.User.sysRole,
     });
+
     return { accessToken };
   },
 
   async logout(refreshToken: string) {
-    await prisma.session.deleteMany({
-      where: { refreshToken },
+    let decoded: any;
+
+    try {
+      decoded = verifyToken(refreshToken);
+    } catch {
+      throw new Error("Invalid refresh token");
+    }
+
+    await prisma.session.delete({
+      where: { id: decoded.jti },
     });
   },
 };
