@@ -1,11 +1,11 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import authRoutes from "./routes/authRoutes";
-import userRoutes from "./routes/userRoutes";
-import oraganizationRoutes from "./routes/organizationRoutes";
-import invitePublicRoutes from "./routes/invitePublicRoutes";
-import notifictionRoutes from "./routes/notificationRoutes";
+import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import oraganizationRoutes from "./routes/organizationRoutes.js";
+import invitePublicRoutes from "./routes/invitePublicRoutes.js";
+import notifictionRoutes from "./routes/notificationRoutes.js";
 
 const app = express();
 

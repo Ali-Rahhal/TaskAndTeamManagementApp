@@ -1,5 +1,5 @@
 // utils/activityLogger.ts
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 export const logActivity = async ({
   organizationId,

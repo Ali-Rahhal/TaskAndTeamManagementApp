@@ -3,8 +3,8 @@ import {
   getNotifications,
   markAsRead,
   markAllAsRead,
-} from "../controllers/notificationController";
-import { requireAuth } from "../middleware/requireAuth";
+} from "../controllers/notificationController.js";
+import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = Router();
 

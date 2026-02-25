@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 // Get all notifications for the logged-in user
 export const getNotifications = async (req: Request, res: Response) => {

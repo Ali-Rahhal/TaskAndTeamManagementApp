@@ -1,5 +1,5 @@
-import { AuthUser } from "./auth";
-import type { OrgRole } from "../constants/roles";
+import { AuthUser } from "./auth.js";
+import type { OrgRole } from "../constants/roles.js";
 
 declare global {
   namespace Express {

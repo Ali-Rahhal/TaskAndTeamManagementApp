@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
-import { prisma } from "../lib/prisma";
-import { ROLES, type OrgRole } from "../constants/roles";
+import { prisma } from "../lib/prisma.js";
+import { ROLES, type OrgRole } from "../constants/roles.js";
 
 export const requireOrgRole = (minRole: OrgRole) => {
   return async (req: Request, res: Response, next: NextFunction) => {

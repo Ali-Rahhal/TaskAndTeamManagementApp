@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { OrganizationController } from "../controllers/organizationController";
-import { requireAuth } from "../middleware/requireAuth";
-import { requireOrgRole } from "../middleware/requireOrgRole";
-import memberRoutes from "./organizationMemberRoutes";
-import inviteRoutes from "./inviteRoutes";
-import projectRoutes from "./projectRoutes";
+import { OrganizationController } from "../controllers/organizationController.js";
+import { requireAuth } from "../middleware/requireAuth.js";
+import { requireOrgRole } from "../middleware/requireOrgRole.js";
+import memberRoutes from "./organizationMemberRoutes.js";
+import inviteRoutes from "./inviteRoutes.js";
+import projectRoutes from "./projectRoutes.js";
 
 const router = Router();
 

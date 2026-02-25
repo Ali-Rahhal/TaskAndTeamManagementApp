@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { TaskController } from "../controllers/taskController";
-import { requireAuth } from "../middleware/requireAuth";
-import { requireOrgRole } from "../middleware/requireOrgRole";
-import taskAssigneeRoutes from "./taskAssigneeRoutes";
-import taskCommentRoutes from "./taskCommentRoutes";
-import taskAttachmentRoutes from "./taskAttachmentRoutes";
+import { TaskController } from "../controllers/taskController.js";
+import { requireAuth } from "../middleware/requireAuth.js";
+import { requireOrgRole } from "../middleware/requireOrgRole.js";
+import taskAssigneeRoutes from "./taskAssigneeRoutes.js";
+import taskCommentRoutes from "./taskCommentRoutes.js";
+import taskAttachmentRoutes from "./taskAttachmentRoutes.js";
 
 const router = Router({ mergeParams: true });
 

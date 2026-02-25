@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import type { SysRole } from "../types/auth";
+import type { SysRole } from "../types/auth.js";
 
 export const requireRole =
   (...roles: SysRole[]) =>

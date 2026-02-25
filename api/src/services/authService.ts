@@ -1,7 +1,11 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { prisma } from "../lib/prisma";
-import { signAccessToken, signRefreshToken, verifyToken } from "../utils/jwt";
+import { prisma } from "../lib/prisma.js";
+import {
+  signAccessToken,
+  signRefreshToken,
+  verifyToken,
+} from "../utils/jwt.js";
 
 export const AuthService = {
   async register(email: string, name: string, password: string) {

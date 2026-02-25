@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import crypto from "crypto";
-import { prisma } from "../lib/prisma";
-import { logActivity } from "../utils/activityLogger";
+import { prisma } from "../lib/prisma.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const InviteController = {
   // List invites for an organization

@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
-import { logActivity } from "../utils/activityLogger";
+import { prisma } from "../lib/prisma.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const TaskAssigneeController = {
   // List assignees of a task

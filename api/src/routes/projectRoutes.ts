@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { ProjectController } from "../controllers/projectController";
-import { requireAuth } from "../middleware/requireAuth";
-import { requireOrgRole } from "../middleware/requireOrgRole";
-import taskRoutes from "./taskRoutes";
+import { ProjectController } from "../controllers/projectController.js";
+import { requireAuth } from "../middleware/requireAuth.js";
+import { requireOrgRole } from "../middleware/requireOrgRole.js";
+import taskRoutes from "./taskRoutes.js";
 
 const router = Router({ mergeParams: true });
 

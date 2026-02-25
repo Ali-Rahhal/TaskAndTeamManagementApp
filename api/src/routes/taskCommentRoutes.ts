@@ -4,9 +4,9 @@ import {
   getTaskComments,
   updateComment,
   deleteComment,
-} from "../controllers/taskCommentController";
-import { requireAuth } from "../middleware/requireAuth";
-import { requireOrgRole } from "../middleware/requireOrgRole";
+} from "../controllers/taskCommentController.js";
+import { requireAuth } from "../middleware/requireAuth.js";
+import { requireOrgRole } from "../middleware/requireOrgRole.js";
 
 const router = Router({ mergeParams: true });
 

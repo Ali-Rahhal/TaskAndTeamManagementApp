@@ -3,9 +3,9 @@ import {
   createAttachment,
   getTaskAttachments,
   deleteAttachment,
-} from "../controllers/taskAttachmentController";
-import { requireAuth } from "../middleware/requireAuth";
-import { requireOrgRole } from "../middleware/requireOrgRole";
+} from "../controllers/taskAttachmentController.js";
+import { requireAuth } from "../middleware/requireAuth.js";
+import { requireOrgRole } from "../middleware/requireOrgRole.js";
 
 const router = Router({ mergeParams: true });
 
